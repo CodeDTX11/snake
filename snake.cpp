@@ -6,11 +6,11 @@
 using namespace std;
 
 bool gameOver;
+bool pause;
 const int displayWidth = 40;
 const int displayHeight = 20;
 
-int snakeHeadX, snakeHeadY, mouseX, mouseY, score;
-int tailX[100], tailY[100];
+int snakeHeadX, snakeHeadY, mouseX, mouseY, curScore;
 int nTail;
 
 deque<pair<int,int>> snakeTail;
@@ -20,24 +20,27 @@ direction dir; //direction the snake moves in
 
 void setup(){ //set up initial snake and mouse location on gamed display
     gameOver = false;
+    pause = false;
+    nTail = 0;
     snakeHeadX = displayWidth/2;
     snakeHeadY = displayHeight/2;
     mouseX = rand() % displayWidth;
     mouseY = rand() % displayHeight;
-    score = 0;
+    curScore = 0;
     dir = STOP;
+    snakeTail.clear();
 }
 
 void draw(){ // print 2d game display
    
-    system("cls"); // clears ouput
+    system("cls"); // clears ouput of previous draw
     cout << endl;
     // cout << " ";
     for(int i = 0; i < displayWidth + 2; i++){
         cout << "=";
     }
     cout << endl;
-    int tailPrint = 0;
+    int tailPrint = 0; // reset for each draw
     for (int row = 0; row < displayHeight; row++) {
         cout << "|";
 
@@ -48,8 +51,9 @@ void draw(){ // print 2d game display
             } else if (row == mouseY && col == mouseX){
                 cout << "@";
             } else if(tailPrint < nTail){ // checks if tail needs to be printed
-                auto tailItr = snakeTail.begin();
                 
+                auto tailItr = snakeTail.begin();
+
                 for ( ; tailItr != snakeTail.end(); ++tailItr) { // iterate through tail to see if needs printing
     
                     if (tailItr->first == col && (*tailItr).second == row) { // print tail
@@ -95,9 +99,13 @@ void input() {
             case 'S':
                 dir = DOWN;
                 break;
-            case 'x':
-            case 'X':
+            case 'q': // q to quit
+            case 'Q':
                 gameOver = true;
+                break;
+            case 'P':
+            case 'p':
+                pause = true;
                 break;
             default:
                 break;
@@ -109,23 +117,24 @@ void logic () {
     bool snakeExtend = false;
     if (snakeHeadX == mouseX && snakeHeadY == mouseY) { //logic when snake eats the mouse
         srand(time(0)); // Random seed value for rand based on time
-        ++score;
+        ++curScore;
         mouseX = rand() % displayWidth;
         mouseY = rand() % displayHeight;
         ++nTail;
-        snakeExtend = true;
+        snakeExtend = true; // if mouse is eaten then the snake will grow/extend
     }
 
 
     if(nTail){
-        snakeTail.push_front({snakeHeadX, snakeHeadY});
+        snakeTail.push_front({snakeHeadX, snakeHeadY}); //deque for snake tail, push current head position onto dq
 
         if(snakeExtend == false){
-            snakeTail.pop_back();
+            snakeTail.pop_back(); //pop back if snake not extended to simulate snake advancing
         }
+        // if snake does extend do not pop back since that is where the snake grows
     }
 
-    switch (dir) {
+    switch (dir) { //snake head advances under current direction
         case LEFT:
             --snakeHeadX;
             break;
@@ -156,31 +165,54 @@ void logic () {
 
 int main(){
     bool playing = true;
+    int highScore = 0;
     //Will make cout much faster
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(NULL);
-    system("MODE con cols=60 lines=25");
+    system("MODE con cols=60 lines=45");
 
     while(playing){
         setup();
 
-        while(!gameOver){
+        while(gameOver == false){
             draw();
             input();
             logic();
             Sleep(100); //sleep in milliseconds
+            if(pause){
+                cout << "Game paused...\n"
+                     << "Current score: " << curScore << endl
+                     << "Press p to unpause or q to quit" << endl;
+
+                char in = _getch();
+                while(!(in == 'p' || in == 'P' || in == 'q' || in == 'Q')){
+                    Sleep(500);
+                }
+
+                if(in == 'q' || in == 'Q'){
+                    gameOver = true;
+                } else {
+                    if(in == 'p')
+                        cout << "Game unpaused...";
+                    pause = false;
+                }
+                Sleep(1000);
+            }
         }
-        cout << "Your final score: " << score << endl;
+        cout << "Score: " << curScore << endl;
         cout << "Play again? Press y for yes or anything else for no" << endl;
         
-        char resp; // user response
-        cin >> resp;
+        highScore = curScore > highScore ? curScore : highScore;
 
+        char resp = _getch();
+        // cin >> resp;
         if(!(resp == 'y' || resp == 'Y')) {
             playing = false;
         }
     }
 
-    cout << "Shutting down...";
+    cout << "\nYour high score: " << highScore << endl
+         << "Shutting down...";
+         
     return 0;
 }
