@@ -2,6 +2,7 @@
 #include <conio.h> //console input/output
 #include <windows.h>
 #include <time.h>
+#include <deque>
 using namespace std;
 
 bool gameOver;
@@ -11,6 +12,8 @@ const int displayHeight = 20;
 int snakeHeadX, snakeHeadY, mouseX, mouseY, score;
 int tailX[100], tailY[100];
 int nTail;
+
+deque<pair<int,int>> snakeTail;
 
 enum direction { STOP = 0, LEFT, RIGHT, UP, DOWN};
 direction dir; //direction the snake moves in
@@ -45,16 +48,17 @@ void draw(){ // print 2d game display
             } else if (row == mouseY && col == mouseX){
                 cout << "@";
             } else if(tailPrint < nTail){ // checks if tail needs to be printed
-                int i = 0;
-                for ( ; i < nTail; i++) { // iterate through tail to see if needs printing
-
-                    if (tailX[i] == col && tailY[i] == row) { // print tail
+                auto tailItr = snakeTail.begin();
+                
+                for ( ; tailItr != snakeTail.end(); ++tailItr) { // iterate through tail to see if needs printing
+    
+                    if (tailItr->first == col && (*tailItr).second == row) { // print tail
                         cout << "o";
                         ++tailPrint;
-                        break;
+                        break; // break out of loop once tail found for particular grid location
                     } 
                 }
-                if (i == nTail){ // if tail not printed, print space for grid
+                if (tailItr == snakeTail.end()){ // if tail not printed, print space for grid
                     cout << " ";
                 }
             } else { 
@@ -102,19 +106,23 @@ void input() {
 }
 void logic () {
 
-    int prevX = tailX[0];
-    int prevY = tailY[0];
-    int prev2X, prev2Y;
-    tailX[0] = snakeHeadX;
-    tailY[0] = snakeHeadY;
-    for (int i = 1; i < nTail; i++)
-    {
-        prev2X = tailX[i];
-        prev2Y = tailY[i];
-        tailX[i] = prevX;
-        tailY[i] = prevY;
-        prevX = prev2X;
-        prevY = prev2Y;
+    bool snakeExtend = false;
+    if (snakeHeadX == mouseX && snakeHeadY == mouseY) { //logic when snake eats the mouse
+        srand(time(0)); // Random seed value for rand based on time
+        ++score;
+        mouseX = rand() % displayWidth;
+        mouseY = rand() % displayHeight;
+        ++nTail;
+        snakeExtend = true;
+    }
+
+
+    if(nTail){
+        snakeTail.push_front({snakeHeadX, snakeHeadY});
+
+        if(snakeExtend == false){
+            snakeTail.pop_back();
+        }
     }
 
     switch (dir) {
@@ -138,18 +146,11 @@ void logic () {
         gameOver = true;
     }
     
-    // for (int i = 0; i < nTail; i++){ // check for snake eating self
-    //     if (snakeHeadX == tailX[i] && snakeHeadY == tailY[i]){
-    //         gameOver = true;
-    //     }
-    // }
-
-    if (snakeHeadX == mouseX && snakeHeadY == mouseY) { //logic when snake eats the mouse
-        srand(time(0)); // Random seed value for rand based on time
-        ++score;
-        mouseX = rand() % displayWidth;
-        mouseY = rand() % displayHeight;
-        ++nTail;
+    for (auto& tailItr : snakeTail){ // check for snake eating self
+        if (snakeHeadX == tailItr.first && snakeHeadY == tailItr.second){
+            gameOver = true;
+            break;
+        }
     }
 }
 
@@ -172,10 +173,10 @@ int main(){
         cout << "Your final score: " << score << endl;
         cout << "Play again? Press y for yes or anything else for no" << endl;
         
-        char ans;
-        cin >> ans;
+        char resp; // user response
+        cin >> resp;
 
-        if(!(ans == 'y' || ans == 'Y')) {
+        if(!(resp == 'y' || resp == 'Y')) {
             playing = false;
         }
     }
