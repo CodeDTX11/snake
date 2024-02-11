@@ -5,7 +5,7 @@
 using namespace std;
 
 bool gameOver;
-const int displayWidth = 40;
+const int displayWidth = 30;
 const int displayHeight = 20;
 
 int snakeHeadX, snakeHeadY, mouseX, mouseY, score;
@@ -22,9 +22,10 @@ void Setup(){ //set up initial snake and mouse location on gamed display
     mouseX = rand() % displayWidth;
     mouseY = rand() % displayHeight;
     score = 0;
+    dir = STOP;
 }
 
-void Draw(){ // print to scree 2d matrix display for game
+void Draw(){ // print 2d matrix to screen for game display
    
     system("cls"); // clears ouput
     cout << endl;
@@ -65,7 +66,7 @@ void Draw(){ // print to scree 2d matrix display for game
     }
     cout << endl;
 }
-void Input() {
+void input() {
 
     if (_kbhit()) { //keyboard hit, returns boolean if keyboard pressed
     
@@ -95,13 +96,64 @@ void Input() {
         }
     }
 }
+void logic () {
+
+    switch (dir) {
+        case LEFT:
+            --snakeHeadX;
+            break;
+        case RIGHT:
+            ++snakeHeadX;
+            break;
+        case UP:
+            --snakeHeadY;
+            break;
+        case DOWN:
+            ++snakeHeadY;
+            break;
+        default:
+            break;
+    }
+
+    if(snakeHeadX < 0 || snakeHeadX >= displayWidth || snakeHeadY < 0 || snakeHeadY >= displayHeight){ // out of bounds
+        gameOver = true;
+    }
+
+    if (snakeHeadX == mouseX && snakeHeadY == mouseY) { //logic when snake eats the mouse
+        srand(time(0)); // Random seed value for rand based on time
+        ++score;
+        mouseX = rand() % displayWidth;
+        mouseY = rand() % displayHeight;
+        ++nTail;
+    }
+}
 
 int main(){
+    bool playing = true;
+    //Will make cout much faster
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(NULL);
 
-    Setup();
-    Draw();
-    Sleep(500); //sleep in milliseconds
+    while(playing){
+        Setup();
 
-    cout << " Your final score:" << score << endl;
+        while(!gameOver){
+            Draw();
+            input();
+            logic();
+            Sleep(100); //sleep in milliseconds
+        }
+        cout << "Your final score: " << score << endl;
+        cout << "Play again? Press y for yes or anything else for no" << endl;
+        
+        char ans;
+        cin >> ans;
+
+        if(!(ans == 'y' || ans == 'Y')) {
+            playing = false;
+        }
+    }
+
+    cout << "Shutting down...";
     return 0;
 }
