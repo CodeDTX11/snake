@@ -11,7 +11,6 @@ const int displayWidth = 40;
 const int displayHeight = 20;
 
 int mouseX, mouseY, curScore;
-int nTail; // length of tail (number of tail segments)
 
 deque<pair<int,int>> snake;
 
@@ -21,7 +20,6 @@ direction dir; //direction the snake moves in
 void setup(){ //set up initial snake and mouse location on gamed display
     gameOver = false;
     pause = false;
-    nTail = 0;
     snake.clear();
     snake.push_front({displayWidth/2, displayHeight/2}); // initiate head of snake
     mouseX = rand() % displayWidth;
@@ -39,7 +37,7 @@ void draw(){ // print 2d game display
         cout << "=";
     }
     cout << endl;
-    int snakePrint = 1; // reset for each draw
+    int snakePrint = 0; // reset for each draw
     for (int row = 0; row < displayHeight; row++) {
         cout << "|";
 
@@ -47,21 +45,21 @@ void draw(){ // print 2d game display
 
             if (row == mouseY && col == mouseX){
                 cout << "@";
-            }else if (snake[0].first == col && snake[0].second == row) { // print distinct head of snake
-                cout << "O";
             } else if (snakePrint < snake.size()) { // checks if tail needs to be printed
                 
-                auto snakeItr = snake.begin();
-                ++snakeItr; // advance iterator since head printed with code above
-                for ( ; snakeItr != snake.end(); ++snakeItr) { // iterate through tail to see if needs printing
-    
-                    if (snakeItr->first == col && (*snakeItr).second == row) { // print tail
-                        cout << "o";
+                int i = 0;
+                for ( ; i < snake.size(); i++) { // iterate through snake to see if needs printing
+                    if (snake[i].first == col && snake[i].second == row) { 
+                        if(i == 0){
+                            cout << "0";
+                        } else {
+                            cout << "o";
+                        }
                         ++snakePrint;
-                        break; // break out of loop once tail found for particular grid location
+                        break; // break out of loop once snake found for particular grid location
                     } 
                 }
-                if (snakeItr == snake.end()){ // if tail not printed, print space for grid
+                if (i == snake.size()){ // if tail not printed, print space for grid
                     cout << " ";
                 }
             } else { 
@@ -117,11 +115,10 @@ void logic () {
         ++curScore;
         mouseX = rand() % displayWidth;
         mouseY = rand() % displayHeight;
-        ++nTail;
         snakeExtend = true; // if mouse is eaten then the snake will grow/extend
     }
     
-    pair<int,int> snakeHead = snake.front(); 
+    pair<int,int> snakeHead = snake.front(); // create new snakehead variable
 
     switch (dir) { //snake head advances under current direction
         case LEFT:
@@ -140,27 +137,22 @@ void logic () {
             break;
     }
 
-    if(snake.size() > 1 && snake[1] == snakeHead){
+    if(snake.size() > 1 && snake[1] == snakeHead){ // check for snake eating self
         gameOver = true;
     }
 
-    snake.push_front(snakeHead); //deque for snake tail, push current head position onto dq
+    snake.push_front(snakeHead); //deque for snake, push current head position onto dq
 
     if(snakeExtend == false){
-            // if(nTail == 1){
-            //     neck = snake.back();
-            // }
         snake.pop_back(); //pop back if snake not extended to simulate snake advancing
-    }
         // if snake does extend, do not pop back since that is where the snake grows
+    } 
 
     //check for out of bounds
     if(snake[0].first < 0 || snake[0].first >= displayWidth || snake[0].second < 0 || snake[0].second >= displayHeight){ 
         gameOver = true;
     }
-    // if(nTail == 1 && neck == pair<int,int>(snakeHeadX,snakeHeadY) ) { 
-    //     gameOver = true;
-    // }
+    
     for (int i = 1; i < snake.size(); i++){ // check for snake eating self
         if (snake[0].first == snake[i].first && snake[0].second == snake[i].second){
             gameOver = true;
