@@ -39,7 +39,7 @@ void draw(){ // print 2d game display
         cout << "=";
     }
     cout << endl;
-    int snakePrint = 0; // reset for each draw
+    int snakePrint = 1; // reset for each draw
     for (int row = 0; row < displayHeight; row++) {
         cout << "|";
 
@@ -47,10 +47,12 @@ void draw(){ // print 2d game display
 
             if (row == mouseY && col == mouseX){
                 cout << "@";
+            }else if (snake[0].first == col && snake[0].second == row) { // print distinct head of snake
+                cout << "O";
             } else if (snakePrint < snake.size()) { // checks if tail needs to be printed
                 
                 auto snakeItr = snake.begin();
-
+                ++snakeItr; // advance iterator since head printed with code above
                 for ( ; snakeItr != snake.end(); ++snakeItr) { // iterate through tail to see if needs printing
     
                     if (snakeItr->first == col && (*snakeItr).second == row) { // print tail
@@ -138,7 +140,7 @@ void logic () {
             break;
     }
 
-    if(snake.size() > 1 && snake.front() == snakeHead){
+    if(snake.size() > 1 && snake[1] == snakeHead){
         gameOver = true;
     }
 
