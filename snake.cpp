@@ -3,12 +3,16 @@
 #include <windows.h>
 #include <time.h>
 #include <deque>
+
+#define WIDTH 40
+#define HEIGHT 20
+
 using namespace std;
 
 bool gameOver;
 bool pause;
-const int displayWidth = 40;
-const int displayHeight = 20;
+const int displayWidth = WIDTH;
+const int displayHeight = HEIGHT;
 
 int mouseX, mouseY, curScore;
 int nTail; // length of tail (number of tail segments)
