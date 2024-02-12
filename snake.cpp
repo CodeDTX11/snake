@@ -7,8 +7,8 @@ using namespace std;
 
 bool gameOver;
 bool pause;
-const int displayWidth = 40;
-const int displayHeight = 20;
+const int displayWidth = 10;
+const int displayHeight = 10;
 
 int snakeHeadX, snakeHeadY, mouseX, mouseY, curScore;
 int nTail;
@@ -71,7 +71,6 @@ void draw(){ // print 2d game display
         }
         cout << "|" << endl;
     }
-
     for(int i = 0; i < displayWidth + 2; i++){
         cout << "=";
     }
@@ -80,8 +79,7 @@ void draw(){ // print 2d game display
 void input() {
 
     if (_kbhit()) { //keyboard hit, returns boolean if keyboard pressed
-    // enter is not needed for user input
-    
+        // enter is not needed for user input
         switch (_getch()) { //get char from keyboard if pressed
             case 'a':
             case 'A':
@@ -103,7 +101,7 @@ void input() {
             case 'Q':
                 gameOver = true;
                 break;
-            case 'P':
+            case 'P': //p for pause
             case 'p':
                 pause = true;
                 break;
@@ -124,14 +122,17 @@ void logic () {
         snakeExtend = true; // if mouse is eaten then the snake will grow/extend
     }
 
-
+    pair<int,int> neck;
     if(nTail){
         snakeTail.push_front({snakeHeadX, snakeHeadY}); //deque for snake tail, push current head position onto dq
 
         if(snakeExtend == false){
+            if(nTail == 1){
+                neck = snakeTail.back();
+            }
             snakeTail.pop_back(); //pop back if snake not extended to simulate snake advancing
         }
-        // if snake does extend do not pop back since that is where the snake grows
+        // if snake does extend, do not pop back since that is where the snake grows
     }
 
     switch (dir) { //snake head advances under current direction
@@ -154,7 +155,9 @@ void logic () {
     if(snakeHeadX < 0 || snakeHeadX >= displayWidth || snakeHeadY < 0 || snakeHeadY >= displayHeight){ 
         gameOver = true;
     }
-    
+    if(nTail == 1 && neck == pair<int,int>(snakeHeadX,snakeHeadY) ) { 
+        gameOver = true;
+    }
     for (auto& tailItr : snakeTail){ // check for snake eating self
         if (snakeHeadX == tailItr.first && snakeHeadY == tailItr.second){
             gameOver = true;
@@ -178,7 +181,6 @@ int main(){
             draw();
             input();
             logic();
-            Sleep(100); //sleep in milliseconds
             if(pause){
                 cout << "Game paused...\n"
                      << "Current score: " << curScore << endl
@@ -186,18 +188,19 @@ int main(){
 
                 char in = _getch();
                 while(!(in == 'p' || in == 'P' || in == 'q' || in == 'Q')){
-                    Sleep(500);
+                    Sleep(250);
+                    in = _getch();
                 }
 
                 if(in == 'q' || in == 'Q'){
                     gameOver = true;
                 } else {
-                    if(in == 'p')
-                        cout << "Game unpaused...";
+                    cout << "Game unpaused.." << endl;
                     pause = false;
+                    Sleep(1000);
                 }
-                Sleep(1000);
             }
+            Sleep(200); //sleep in milliseconds
         }
         cout << "Score: " << curScore << endl;
         cout << "Play again? Press y for yes or anything else for no" << endl;
@@ -213,6 +216,6 @@ int main(){
 
     cout << "\nYour high score: " << highScore << endl
          << "Shutting down...";
-         
+
     return 0;
 }
