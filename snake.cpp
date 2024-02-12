@@ -10,10 +10,10 @@ bool pause;
 const int displayWidth = 40;
 const int displayHeight = 20;
 
-int snakeHeadX, snakeHeadY, mouseX, mouseY, curScore;
+int mouseX, mouseY, curScore;
 int nTail; // length of tail (number of tail segments)
 
-deque<pair<int,int>> snakeTail;
+deque<pair<int,int>> snake;
 
 enum direction { STOP = 0, LEFT, RIGHT, UP, DOWN};
 direction dir; //direction the snake moves in
@@ -22,47 +22,44 @@ void setup(){ //set up initial snake and mouse location on gamed display
     gameOver = false;
     pause = false;
     nTail = 0;
-    snakeHeadX = displayWidth/2;
-    snakeHeadY = displayHeight/2;
+    snake.clear();
+    snake.push_front({displayWidth/2, displayHeight/2}); // initiate head of snake
     mouseX = rand() % displayWidth;
     mouseY = rand() % displayHeight;
     curScore = 0;
     dir = STOP;
-    snakeTail.clear();
 }
 
 void draw(){ // print 2d game display
    
     system("cls"); // clears ouput of previous draw
     cout << endl;
-    // cout << " ";
+    
     for(int i = 0; i < displayWidth + 2; i++){
         cout << "=";
     }
     cout << endl;
-    int tailPrint = 0; // reset for each draw
+    int snakePrint = 0; // reset for each draw
     for (int row = 0; row < displayHeight; row++) {
         cout << "|";
 
         for (int col = 0; col < displayWidth; col++) {
 
-            if (row == snakeHeadY && col == snakeHeadX){
-                cout << "0";
-            } else if (row == mouseY && col == mouseX){
+            if (row == mouseY && col == mouseX){
                 cout << "@";
-            } else if(tailPrint < nTail){ // checks if tail needs to be printed
+            } else if (snakePrint < snake.size()) { // checks if tail needs to be printed
                 
-                auto tailItr = snakeTail.begin();
+                auto snakeItr = snake.begin();
 
-                for ( ; tailItr != snakeTail.end(); ++tailItr) { // iterate through tail to see if needs printing
+                for ( ; snakeItr != snake.end(); ++snakeItr) { // iterate through tail to see if needs printing
     
-                    if (tailItr->first == col && (*tailItr).second == row) { // print tail
+                    if (snakeItr->first == col && (*snakeItr).second == row) { // print tail
                         cout << "o";
-                        ++tailPrint;
+                        ++snakePrint;
                         break; // break out of loop once tail found for particular grid location
                     } 
                 }
-                if (tailItr == snakeTail.end()){ // if tail not printed, print space for grid
+                if (snakeItr == snake.end()){ // if tail not printed, print space for grid
                     cout << " ";
                 }
             } else { 
@@ -113,7 +110,7 @@ void input() {
 void logic () {
 
     bool snakeExtend = false;
-    if (snakeHeadX == mouseX && snakeHeadY == mouseY) { //logic when snake eats the mouse
+    if (snake[0].first == mouseX && snake[0].second == mouseY) { //logic when snake eats the mouse
         srand(time(0)); // Random seed value for rand based on time
         ++curScore;
         mouseX = rand() % displayWidth;
@@ -121,45 +118,49 @@ void logic () {
         ++nTail;
         snakeExtend = true; // if mouse is eaten then the snake will grow/extend
     }
-
-    pair<int,int> neck;
-    if(nTail){
-        snakeTail.push_front({snakeHeadX, snakeHeadY}); //deque for snake tail, push current head position onto dq
-
-        if(snakeExtend == false){
-            if(nTail == 1){
-                neck = snakeTail.back();
-            }
-            snakeTail.pop_back(); //pop back if snake not extended to simulate snake advancing
-        }
-        // if snake does extend, do not pop back since that is where the snake grows
-    }
+    
+    pair<int,int> snakeHead = snake.front(); 
 
     switch (dir) { //snake head advances under current direction
         case LEFT:
-            --snakeHeadX;
+            --snakeHead.first;
             break;
         case RIGHT:
-            ++snakeHeadX;
+            ++snakeHead.first;
             break;
         case UP:
-            --snakeHeadY;
+            --snakeHead.second;
             break;
         case DOWN:
-            ++snakeHeadY;
+            ++snakeHead.second;
             break;
         default:
             break;
     }
+
+    if(snake.size() > 1 && snake.front() == snakeHead){
+        gameOver = true;
+    }
+
+    snake.push_front(snakeHead); //deque for snake tail, push current head position onto dq
+
+    if(snakeExtend == false){
+            // if(nTail == 1){
+            //     neck = snake.back();
+            // }
+        snake.pop_back(); //pop back if snake not extended to simulate snake advancing
+    }
+        // if snake does extend, do not pop back since that is where the snake grows
+
     //check for out of bounds
-    if(snakeHeadX < 0 || snakeHeadX >= displayWidth || snakeHeadY < 0 || snakeHeadY >= displayHeight){ 
+    if(snake[0].first < 0 || snake[0].first >= displayWidth || snake[0].second < 0 || snake[0].second >= displayHeight){ 
         gameOver = true;
     }
-    if(nTail == 1 && neck == pair<int,int>(snakeHeadX,snakeHeadY) ) { 
-        gameOver = true;
-    }
-    for (auto& tailItr : snakeTail){ // check for snake eating self
-        if (snakeHeadX == tailItr.first && snakeHeadY == tailItr.second){
+    // if(nTail == 1 && neck == pair<int,int>(snakeHeadX,snakeHeadY) ) { 
+    //     gameOver = true;
+    // }
+    for (int i = 1; i < snake.size(); i++){ // check for snake eating self
+        if (snake[0].first == snake[i].first && snake[0].second == snake[i].second){
             gameOver = true;
             break;
         }
@@ -177,7 +178,7 @@ int main(){
     while(playing){
         setup();
 
-        while(gameOver == false){
+        while(gameOver == false) {
             draw();
             input();
             logic();
@@ -195,7 +196,7 @@ int main(){
                 if(in == 'q' || in == 'Q'){
                     gameOver = true;
                 } else {
-                    cout << "Game unpaused.." << endl;
+                    cout << "Game unpaused..." << endl;
                     pause = false;
                     Sleep(1000);
                 }
@@ -203,14 +204,20 @@ int main(){
             Sleep(100); //sleep in milliseconds
         }
         cout << "Score: " << curScore << endl;
-        cout << "Play again? Press y for yes or anything else for no" << endl;
+        cout << "Play again? Press y for yes or q for quit" << endl;
         
         highScore = curScore > highScore ? curScore : highScore;
 
         char resp = _getch();
-        // cin >> resp;
-        if(!(resp == 'y' || resp == 'Y')) {
+        while(!(resp == 'y' || resp == 'q')){
+            Sleep(100);
+            resp = _getch();
+        }
+        if(resp == 'q'){
             playing = false;
+        } else {
+            cout << "Starting new game..." << endl;
+            Sleep(1000);
         }
     }
 
