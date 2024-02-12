@@ -147,9 +147,7 @@ void logic () {
     snake.push_front(snakeHead); //deque for snake tail, push current head position onto dq
 
     if(snakeExtend == false){
-            // if(nTail == 1){
-            //     neck = snake.back();
-            // }
+            // help
         snake.pop_back(); //pop back if snake not extended to simulate snake advancing
     }
         // if snake does extend, do not pop back since that is where the snake grows
