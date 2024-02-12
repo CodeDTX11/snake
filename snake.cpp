@@ -7,11 +7,11 @@ using namespace std;
 
 bool gameOver;
 bool pause;
-const int displayWidth = 10;
-const int displayHeight = 10;
+const int displayWidth = 40;
+const int displayHeight = 20;
 
 int snakeHeadX, snakeHeadY, mouseX, mouseY, curScore;
-int nTail;
+int nTail; // length of tail (number of tail segments)
 
 deque<pair<int,int>> snakeTail;
 
@@ -200,7 +200,7 @@ int main(){
                     Sleep(1000);
                 }
             }
-            Sleep(200); //sleep in milliseconds
+            Sleep(100); //sleep in milliseconds
         }
         cout << "Score: " << curScore << endl;
         cout << "Play again? Press y for yes or anything else for no" << endl;
