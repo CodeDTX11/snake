@@ -16,7 +16,7 @@ int main(){
     //Will make cout much faster
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(NULL);
-    system("MODE con cols=50 lines=5");
+    // system("MODE con cols=100 lines=100");
 
     while(playing){
         setup();
@@ -43,6 +43,8 @@ int main(){
                     pause = false;
                     Sleep(1000);
                 }
+                // system("pause");
+                // pause = false;
             }
             Sleep(100); //sleep in milliseconds to slow game down
         }

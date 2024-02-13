@@ -153,10 +153,21 @@ void logic () {
         // if snake does extend, do not pop back since that is where the snake grows
     } 
 
-    //check for out of bounds
+    //check if snake head hits out of bounds (harder)
     if(snake[0].first < 0 || snake[0].first >= displayWidth || snake[0].second < 0 || snake[0].second >= displayHeight){ 
         gameOver = true;
     }
+
+    //alternatively the code below can wrap the snake around borders instead of hitting out of bounds (easier)
+    // if(snake[0].first < 0){
+    //     snake[0].first = displayWidth - 1;
+    // }else if (snake[0].first >= displayWidth){
+    //     snake[0].first = 0;
+    // } else if (snake[0].second < 0){
+    //     snake[0].second = displayHeight - 1;
+    // } else if (snake[0].second >= displayHeight){ 
+    //     snake[0].second = 0;
+    // }
     
     for (int i = 1; i < snake.size(); i++){ // check for snake eating self
         if (snake[0].first == snake[i].first && snake[0].second == snake[i].second){
