@@ -16,7 +16,7 @@ int main(){
     //Will make cout much faster
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(NULL);
-    system("MODE con cols=60 lines=45");
+    system("MODE con cols=50 lines=5");
 
     while(playing){
         setup();
@@ -44,13 +44,11 @@ int main(){
                     Sleep(1000);
                 }
             }
-            Sleep(100); //sleep in milliseconds
+            Sleep(100); //sleep in milliseconds to slow game down
         }
         cout << "Score: " << curScore << endl;
         cout << "Play again? Press y for yes or q for quit" << endl;
         
-        highScore = curScore > highScore ? curScore : highScore;
-
         char resp = _getch();
         while(!(resp == 'y' || resp == 'q')){
             Sleep(100);
@@ -62,7 +60,10 @@ int main(){
             cout << "Starting new game..." << endl;
             Sleep(1000);
         }
+
+        highScore = curScore > highScore ? curScore : highScore;
     }
+    
     cout << "\nYour high score: " << highScore << endl
          << "Shutting down...";
 
