@@ -22,7 +22,7 @@ int main(){
 
     cout << "\nWelcome to classic snake\n\n"
          << "Press 1 for out of bounds mode\n"
-         << "or press 2 for wraparound mode\n"
+         << "or press 2 for wrap-around mode\n"
          << "or q to quit" << endl;
     
     mode = _getch();
@@ -34,7 +34,7 @@ int main(){
     if(mode == '1'){
         cout << "\nOut of bounds mode activated" << endl;
     } else if (mode == '2') {
-        cout << "\nWraparound mode activated" << endl;
+        cout << "\nWrap-around mode activated" << endl;
     } else {
         cout << "\nShutting down...." << endl << endl;
         return 0;
@@ -97,7 +97,7 @@ int main(){
             Sleep(100); //sleep in milliseconds to slow game down
         }
         cout << "\nScore: " << curScore << endl;
-        cout << "Play again? Press y for yes or q for quit" << endl;
+        cout << "Play again? Press y for yes or q to exit game" << endl;
         
         char resp = _getch();
         while(!(resp == 'y' || resp == 'q')){
@@ -107,7 +107,7 @@ int main(){
         if(resp == 'q'){
             playing = false;
         } else {
-            cout << "Starting new game..." << endl;
+            cout << "\nStarting new game..." << endl;
             Sleep(1000);
         }
 

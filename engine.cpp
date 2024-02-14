@@ -29,6 +29,7 @@ void setup(){ //set up initial snake and mouse location on gamed display
     quit = false;
     pause = false;
     snake.clear();
+    srand(time(0));
     snake.push_front({displayWidth/2, displayHeight/2}); // initiate head of snake
     mouseX = rand() % displayWidth;
     mouseY = rand() % displayHeight;
@@ -119,7 +120,7 @@ void logic () {
 
     bool snakeExtend = false;
     if (snake[0].first == mouseX && snake[0].second == mouseY) { //logic when snake eats the mouse
-        srand(time(0)); // Random seed value for rand based on time
+        // srand(time(0)); // Random seed value for rand based on time
         ++curScore;
         mouseX = rand() % displayWidth;
         mouseY = rand() % displayHeight;
