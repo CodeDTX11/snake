@@ -10,20 +10,23 @@ using namespace std;
 #define WIDTH 40
 #define HEIGHT 20
 
-bool gameOver, pause;
+bool gameOver, pause, quit;
 
 const int displayWidth = WIDTH;
 const int displayHeight = HEIGHT;
 
 int mouseX, mouseY, curScore;
 
+char mode;
+
 deque<pair<int,int>> snake;
 
-enum direction { STOP = 0, LEFT, RIGHT, UP, DOWN};
-direction dir; //direction the snake moves in
+enum direction { STOP = 0, LEFT, RIGHT, UP, DOWN} dir;
+// direction dir; //direction the snake moves in
 
 void setup(){ //set up initial snake and mouse location on gamed display
     gameOver = false;
+    quit = false;
     pause = false;
     snake.clear();
     snake.push_front({displayWidth/2, displayHeight/2}); // initiate head of snake
@@ -101,7 +104,7 @@ void input() {
                 break;
             case 'q': // q to quit
             case 'Q':
-                gameOver = true;
+                quit = true;
                 break;
             case 'P': //p for pause
             case 'p':
@@ -144,6 +147,7 @@ void logic () {
 
     if(snake.size() > 1 && snake[1] == snakeHead){ // check for snake eating self
         gameOver = true;
+        cout << "\nCollison occured" << endl;
     }
 
     snake.push_front(snakeHead); //deque for snake, push current head position onto dq
@@ -153,25 +157,29 @@ void logic () {
         // if snake does extend, do not pop back since that is where the snake grows
     } 
 
-    //check if snake head hits out of bounds (harder)
-    if(snake[0].first < 0 || snake[0].first >= displayWidth || snake[0].second < 0 || snake[0].second >= displayHeight){ 
-        gameOver = true;
+    if(mode == '1'){
+        //check if snake head hits out of bounds (harder)
+        if(snake[0].first < 0 || snake[0].first >= displayWidth || snake[0].second < 0 || snake[0].second >= displayHeight){ 
+            gameOver = true;
+            cout << "\nCollision occured" << endl;
+        }
+    } else {
+        //alternatively the code below wraps the snake around borders instead of hitting out of bounds (easier)
+        if(snake[0].first < 0){
+            snake[0].first = displayWidth - 1;
+        }else if (snake[0].first >= displayWidth){
+            snake[0].first = 0;
+        } else if (snake[0].second < 0){
+            snake[0].second = displayHeight - 1;
+        } else if (snake[0].second >= displayHeight){ 
+            snake[0].second = 0;
+        }
     }
 
-    //alternatively the code below can wrap the snake around borders instead of hitting out of bounds (easier)
-    // if(snake[0].first < 0){
-    //     snake[0].first = displayWidth - 1;
-    // }else if (snake[0].first >= displayWidth){
-    //     snake[0].first = 0;
-    // } else if (snake[0].second < 0){
-    //     snake[0].second = displayHeight - 1;
-    // } else if (snake[0].second >= displayHeight){ 
-    //     snake[0].second = 0;
-    // }
-    
     for (int i = 1; i < snake.size(); i++){ // check for snake eating self
         if (snake[0].first == snake[i].first && snake[0].second == snake[i].second){
             gameOver = true;
+            cout << "\nCollision occured" << endl;
             break;
         }
     }

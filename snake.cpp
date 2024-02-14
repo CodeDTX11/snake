@@ -10,6 +10,8 @@ int main(){
     extern bool gameOver;
     extern bool pause;
     extern int curScore;
+    extern char mode;
+    extern bool quit;
 
     bool playing = true;
     int highScore = 0;
@@ -18,10 +20,56 @@ int main(){
     std::cin.tie(NULL);
     // system("MODE con cols=100 lines=100");
 
+    cout << "\nWelcome to classic snake\n\n"
+         << "Press 1 for out of bounds mode\n"
+         << "or press 2 for wraparound mode\n"
+         << "or q to quit" << endl;
+    
+    mode = _getch();
+    while(!(mode == '1' || mode == '2' || mode == 'q')){
+        cout << "Enter 1, 2 or q" << endl;
+        mode = _getch();
+    }
+
+    if(mode == '1'){
+        cout << "\nOut of bounds mode activated" << endl;
+    } else if (mode == '2') {
+        cout << "\nWraparound mode activated" << endl;
+    } else {
+        cout << "\nShutting down...." << endl << endl;
+        return 0;
+    }
+
+    cout << "\nStarting game.." << endl;
+    Sleep(1000);
+    cout << "2.." << endl;
+    Sleep(1000);
+    cout << "1.." << endl;
+    Sleep(1000);
+
     while(playing){
+
         setup();
 
         while(gameOver == false) {
+            if(quit){
+                cout << "Are you sure you want to quit?\n" 
+                     << "Hit q again to quit or n resume" << endl;
+                
+                char ans = _getch();
+                while(!(ans == 'q' || ans == 'n')){
+                    cout << "\nq to quit n to resume" << endl;
+                    ans = _getch();
+                }
+                if(ans == 'q'){
+                    break;
+                } else {
+                    cout << "\nResuming game..." << endl;
+                    Sleep(1000);
+                    quit = false;
+                }
+
+            }
             draw();
             input();
             logic();
@@ -39,7 +87,7 @@ int main(){
                 if(in == 'q' || in == 'Q'){
                     gameOver = true;
                 } else {
-                    cout << "Game unpaused..." << endl;
+                    cout << "\nGame unpaused..." << endl;
                     pause = false;
                     Sleep(1000);
                 }
@@ -48,7 +96,7 @@ int main(){
             }
             Sleep(100); //sleep in milliseconds to slow game down
         }
-        cout << "Score: " << curScore << endl;
+        cout << "\nScore: " << curScore << endl;
         cout << "Play again? Press y for yes or q for quit" << endl;
         
         char resp = _getch();
@@ -67,7 +115,7 @@ int main(){
     }
     
     cout << "\nYour high score: " << highScore << endl
-         << "Shutting down...";
+         << "Shutting down..." << endl << endl;
 
     return 0;
 }
