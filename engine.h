@@ -2,7 +2,8 @@
 #define ENGINE_H
 
 void setup();
-void draw();
+void grid_prnt();
+// void draw();
 void input();
 void logic ();
 

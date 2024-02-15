@@ -72,7 +72,8 @@ int main(){
                 }
 
             }
-            draw();
+            // draw();
+            grid_prnt();
             input();
             logic();
             if(pause){
