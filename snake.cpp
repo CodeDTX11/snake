@@ -16,8 +16,10 @@ int main(){
     bool playing = true;
     int highScore = 0;
     //Will make cout much faster
+
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(NULL);
+    
     // system("MODE con cols=100 lines=100");
 
     cout << "\nWelcome to classic snake\n\n"

@@ -162,7 +162,7 @@ void logic () {
         //check if snake head hits out of bounds (harder)
         if(snake[0].first < 0 || snake[0].first >= displayWidth || snake[0].second < 0 || snake[0].second >= displayHeight){ 
             gameOver = true;
-            cout << "\nCollision occured" << endl;
+            cout << "\nOut of bounds" << endl;
         }
     } else {
         //alternatively the code below wraps the snake around borders instead of hitting out of bounds (easier)
