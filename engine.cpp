@@ -10,13 +10,14 @@ using namespace std;
 #define WIDTH 40
 #define HEIGHT 20
 
-bool gameOver, pause, quit;
+bool gameOver, pause, quit, hasTail;
 
 const int displayWidth = WIDTH;
 const int displayHeight = HEIGHT;
 
 pair<int,int> head;
 pair<int,int> tail;
+// pair<int,int> prev_head;
 int curScore;
 
 char mode;
@@ -25,19 +26,24 @@ char hd = '0'; //snake head display
 char bd = 'o'; //snake body display
 char ms = '@'; //mouse display
 
-enum direction {LEFT, RIGHT, UP, DOWN, STOP} dir;
-// direction dir; //direction the snake moves in
+//direction the snake moves in
+enum direction {LEFT, RIGHT, UP, DOWN, STOP} dir, prevDir;
 
-pair<int,int> moveMnt[] = {{-1,0}, {1,0}, {0,-1}, {0,1}, {0,0}}; // used for snake movement
+pair<int,int> moveMnt[] = {{-1,0}, {1,0}, {0,-1}, {0,1}}; // used for snake movement
 
 pair<char, direction> grid[HEIGHT][WIDTH] = {}; // game board grid
 
-pair<int,int> operator +=(pair<int,int> &a, pair<int,int> &b) { // overload operator for pair
+pair<int,int> operator +=(pair<int,int> &a, pair<int,int> &b) { // overload += operator for pair
     // return {a.first + b.first, a.second + b.second};
     a.first = a.first + b.first;
     a.second = a.second + b.second;
 }
-pair<int,int> operator +(pair<int,int> &a, pair<int,int> &b) { // overload op for pair
+pair<int,int> operator -=(pair<int,int> &a, pair<int,int> &b) { // overload += operator for pair
+    // return {a.first + b.first, a.second + b.second};
+    a.first = a.first - b.first;
+    a.second = a.second - b.second;
+}
+pair<int,int> operator +(pair<int,int> &a, pair<int,int> &b) { // overload + op for pair
     return {a.first + b.first, a.second + b.second};
 }
 
@@ -45,6 +51,8 @@ void setup(){ //set up initial snake and mouse location on gamed display
     gameOver = false;
     quit = false;
     pause = false;
+    hasTail = false;
+
     srand(time(0));
 
     for(int row = 0; row < HEIGHT; row++){ // initialize grid with spaces
@@ -55,13 +63,13 @@ void setup(){ //set up initial snake and mouse location on gamed display
 
     head = {displayWidth/2, displayHeight/2}; // retain snake head for processing
     tail = {head.first, head.second}; // start out tail pointer/coordinates same as head
+    // prev_head = tail = {head.first, head.second}; // start out tail pointer/coordinates same as head
 
-    grid[head.second][head.first].first = hd;// seed snake head
-
+    grid[head.second][head.first].first = hd;// seed snake head for grid
     grid[rand() % displayHeight][rand() % displayWidth].first = ms; // seed mouse
 
     curScore = 0;
-    dir = STOP;
+    dir = prevDir = STOP;
 }
 
 void grid_prnt(){
@@ -88,6 +96,8 @@ void grid_prnt(){
 
 void input() {
 
+    prevDir = dir;
+    
     if (_kbhit()) { //keyboard hit, returns boolean if keyboard pressed
         // enter is not needed for user input
         switch (_getch()) { //get char from keyboard if pressed
@@ -122,9 +132,11 @@ void input() {
 }
 
 void logic () {
-    if(dir != STOP){
-        // pair<int,int> tail = {head.first, head.second}; 
 
+    if(dir != STOP){ 
+        
+        string message;
+        // prev_head = head;
         grid[head.second][head.first] = {bd, dir};
         
         switch (dir) { //snake head advances under current direction
@@ -149,24 +161,32 @@ void logic () {
             
             ++curScore;
 
-            grid[rand() % displayHeight][rand() % displayWidth].first = ms; // mouse
+            pair<int,int> mouseSeed = {rand() % displayWidth, rand() % displayHeight};
+
+            while(grid[mouseSeed.second][mouseSeed.first].first != ' '){ // check for opening on grid for new mouse seed
+                mouseSeed = {rand() % displayWidth, rand() % displayHeight};
+            }
+
+            grid[mouseSeed.second][mouseSeed.first].first = ms;
 
             snakeExtend = true; // if mouse is eaten then the snake will grow/extend
+            hasTail = true;
         }
 
         if(mode == '1'){
             //check if snake head hits out of bounds (harder)
             if(head.first < 0 || head.first == displayWidth  || head.second < 0 || head.second == displayHeight ){ 
                 gameOver = true;
-                grid[head.second][head.first].first = 'X';
-                cout << "\nOut of bounds" << endl;
+
+                head -= moveMnt[dir]; // used to mark location where snake head hit out of bounds
+                
+                message = "\nOut of bounds";
             }
         } else {
             //alternatively the code below wraps the snake around borders instead of hitting out of bounds (easier)
             if(head.first < 0) {
                 head.first = displayWidth - 1;
             } else if (head.first == displayWidth ){
-                // gameOver = true;
                 head.first = 0;
             } else if (head.second < 0){
                 head.second = displayHeight - 1;
@@ -179,12 +199,12 @@ void logic () {
             direction tailDirection = grid[tail.second][tail.first].second;
             
             grid[tail.second][tail.first].first = ' ';
-            grid[tail.second][tail.first].second = {STOP};
+            // grid[tail.second][tail.first].second = {STOP};
 
             // tail = tail + moveMnt[tailDirection];
             tail += moveMnt[tailDirection];
 
-            if(mode == '2'){ // check for snake tail wrapping around while following head
+            if(mode != '1'){ // check for snake tail wrapping around while following head
                 if(tail.first < 0) {
                     tail.first = displayWidth - 1;
                 } else if (tail.first == displayWidth ){
@@ -195,14 +215,31 @@ void logic () {
                     tail.second = 0;
                 }
             }
-        } // if extend did occur then tail pointer remains the same
+        } // if extend did occur then tail pointer remains the same, no need to change at the moment
 
-        if (grid[head.second][head.first].first == bd){ // check for snake eating self
+        //logic needed for collision on 2 segment snake
+        if(hasTail && (moveMnt[prevDir] + moveMnt[dir]) == pair<int,int>{0,0} ) {
+            
+            grid[head.second - moveMnt[dir].second][head.first - moveMnt[dir].first].first = ' '; //clear segment 
+            
             gameOver = true;
-            grid[head.second][head.first].first = 'X';
-            cout << "\nYou bit yourself" << endl;
+            message = "\nCongratulations you played(bit) yourself..";
         }
 
-        grid[head.second][head.first].first = hd; // reasign head display value
+        if (grid[head.second][head.first].first == bd){ // check for snake eating self
+
+            // grid[head.second - moveMnt[dir].second][head.first - moveMnt[dir].first].first = ' ';
+            
+            gameOver = true;
+            message = "\nCongratulations you played(bit) yourself..";
+        }
+
+        if(gameOver){
+            grid[head.second][head.first].first = 'X'; // reasign head display value for death
+            grid_prnt();
+            cout << message << endl;
+        } else {
+            grid[head.second][head.first].first = hd; // reasign head display value
+        }
     }
 }

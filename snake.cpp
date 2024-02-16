@@ -23,18 +23,18 @@ int main(){
     // system("MODE con cols=100 lines=100");
 
     cout << "\nWelcome to classic snake\n\n"
-         << "Press 1 for out of bounds mode\n"
-         << "or press 2 for wrap-around mode\n"
-         << "or q to quit" << endl;
+         << "Enter [1] for Strict border mode\n"
+         << "Enter [2] for wrap-around mode\n"
+         << "Enter [q] to quit" << endl;
     
     mode = _getch();
     while(!(mode == '1' || mode == '2' || mode == 'q')){
-        cout << "Enter 1, 2 or q" << endl;
+        cout << "Enter [1], [2] or [q]" << endl;
         mode = _getch();
     }
 
     if(mode == '1'){
-        cout << "\nOut of bounds mode activated" << endl;
+        cout << "\nStrict border mode activated" << endl;
     } else if (mode == '2') {
         cout << "\nWrap-around mode activated" << endl;
     } else {
@@ -44,10 +44,10 @@ int main(){
 
     cout << "\nStarting game.." << endl;
     Sleep(1000);
-    cout << "2.." << endl;
-    Sleep(1000);
-    cout << "1.." << endl;
-    Sleep(1000);
+    // cout << "2.." << endl;
+    // Sleep(1000);
+    // cout << "1.." << endl;
+    // Sleep(1000);
 
     while(playing){
 
@@ -56,11 +56,11 @@ int main(){
         while(gameOver == false) {
             if(quit){
                 cout << "Are you sure you want to quit?\n" 
-                     << "Hit q again to quit or n resume" << endl;
+                     << "[q] to quit / [n] to resume" << endl;
                 
                 char ans = _getch();
                 while(!(ans == 'q' || ans == 'n')){
-                    cout << "\nq to quit n to resume" << endl;
+                    cout << "\n[q] to quit / [n] to resume" << endl;
                     ans = _getch();
                 }
                 if(ans == 'q'){
@@ -72,7 +72,6 @@ int main(){
                 }
 
             }
-            // draw();
             grid_prnt();
             input();
             logic();
@@ -99,8 +98,9 @@ int main(){
             }
             Sleep(100); //sleep in milliseconds to slow game down
         }
+
         cout << "\nScore: " << curScore << endl;
-        cout << "Play again? Press y for yes or q to exit game" << endl;
+        cout << "Play again? [y] for yes / [q] to exit game" << endl;
         
         char resp = _getch();
         while(!(resp == 'y' || resp == 'q')){
@@ -110,6 +110,21 @@ int main(){
         if(resp == 'q'){
             playing = false;
         } else {
+            cout << "\nSelect game mode...\n"
+                 << "[1] for strict border mode\n"
+                 << "[2] for wrap-around mode" << endl;
+
+            mode = _getch();
+            while(!(mode == '1' || mode == '2')){
+                cout << "Enter [1] or [2]" << endl;
+                mode = _getch();
+            }
+
+            if(mode == '1'){
+                cout << "\nStrict border mode activated\n";
+            } else {
+                cout << "\nWrap-around mode activated\n";
+            }
             cout << "\nStarting new game..." << endl;
             Sleep(1000);
         }

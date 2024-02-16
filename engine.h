@@ -3,7 +3,6 @@
 
 void setup();
 void grid_prnt();
-// void draw();
 void input();
 void logic ();
 
