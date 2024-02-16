@@ -22,8 +22,21 @@ int main(){
     
     // system("MODE con cols=100 lines=100");
 
+    string title =
+        "//////////////////////////////////////////////////////////////////////////////////////////////\n"
+        "////                                                                                      ////\n"
+        "////      //////////////  ///////    ////   ////////          ////   ////   ////////////  ////\n"
+        "////     ////            //// ////  ////   ////  ////        ////  ////    ////           ////\n"
+        "////    //////////////  ////   /// ////   ////////////      ////////      //////////      ////\n"
+        "////             ////  ////     //////   ////      ////    ////  ////    ////             ////\n"
+        "////  //////////////  ////       ////   ////        ////  ////    ////  ////////////      ////\n"
+        "////                                                                                      ////\n"
+        "//////////////////////////////////////////////////////////////////////////////////////////////";
+
+    cout << title << endl;
+    
     cout << "\nWelcome to classic snake\n\n"
-         << "Enter [1] for Strict border mode\n"
+         << "Enter [1] for strict border mode\n"
          << "Enter [2] for wrap-around mode\n"
          << "Enter [q] to quit" << endl;
     
@@ -56,7 +69,7 @@ int main(){
         while(gameOver == false) {
             if(quit){
                 cout << "Are you sure you want to quit?\n" 
-                     << "[q] to quit / [n] to resume" << endl;
+                     << "Enter [q] to quit / [n] to resume" << endl;
                 
                 char ans = _getch();
                 while(!(ans == 'q' || ans == 'n')){
@@ -78,7 +91,7 @@ int main(){
             if(pause){
                 cout << "Game paused...\n"
                      << "Current score: " << curScore << endl
-                     << "Press p to unpause or q to quit" << endl;
+                     << "Enter [p] to unpause / [q] to quit" << endl;
 
                 char in = _getch();
                 while(!(in == 'p' || in == 'P' || in == 'q' || in == 'Q')){
@@ -97,6 +110,7 @@ int main(){
                 // pause = false;
             }
             Sleep(100); //sleep in milliseconds to slow game down
+            // Sleep(50); //adjust number to speed or slow up game
         }
 
         cout << "\nScore: " << curScore << endl;

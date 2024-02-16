@@ -1,7 +1,6 @@
 #include <iostream>
 #include <conio.h> //console input/output
 #include <time.h>
-// #include <deque>
 
 #include "engine.h"
 
@@ -29,7 +28,7 @@ char ms = '@'; //mouse display
 //direction the snake moves in
 enum direction {LEFT, RIGHT, UP, DOWN, STOP} dir, prevDir;
 
-pair<int,int> moveMnt[] = {{-1,0}, {1,0}, {0,-1}, {0,1}}; // used for snake movement
+pair<int,int> moveMnt[] = {{-1,0}, {1,0}, {0,-1}, {0,1}}; // used for snake movement, to move coordinates 
 
 pair<char, direction> grid[HEIGHT][WIDTH] = {}; // game board grid
 
@@ -38,7 +37,7 @@ pair<int,int> operator +=(pair<int,int> &a, pair<int,int> &b) { // overload += o
     a.first = a.first + b.first;
     a.second = a.second + b.second;
 }
-pair<int,int> operator -=(pair<int,int> &a, pair<int,int> &b) { // overload += operator for pair
+pair<int,int> operator -=(pair<int,int> &a, pair<int,int> &b) { // overload -= operator for pair
     // return {a.first + b.first, a.second + b.second};
     a.first = a.first - b.first;
     a.second = a.second - b.second;
@@ -63,7 +62,6 @@ void setup(){ //set up initial snake and mouse location on gamed display
 
     head = {displayWidth/2, displayHeight/2}; // retain snake head for processing
     tail = {head.first, head.second}; // start out tail pointer/coordinates same as head
-    // prev_head = tail = {head.first, head.second}; // start out tail pointer/coordinates same as head
 
     grid[head.second][head.first].first = hd;// seed snake head for grid
     grid[rand() % displayHeight][rand() % displayWidth].first = ms; // seed mouse
@@ -76,7 +74,7 @@ void grid_prnt(){
     
     system("cls"); // clears ouput of previous draw
 
-    for(int i = 0; i < WIDTH + 2; i++){
+    for(int i = 0; i < WIDTH + 2; i++){ //top border
         cout << "=";
     }
     cout << endl;
@@ -88,7 +86,7 @@ void grid_prnt(){
         }
         cout << '|' << endl;
     }
-    for(int i = 0; i < WIDTH + 2; i++){
+    for(int i = 0; i < WIDTH + 2; i++){ //bottom border
         cout << "=";
     }
     cout << endl;
@@ -125,6 +123,26 @@ void input() {
             case 'p':
                 pause = true;
                 break;
+            case 0: //used for arrow keys, _getch() returns 0 on first call then second call returns arrow key value
+                    //when a special character is pressed, getch() queues up 2 values in the buffer
+                    //first call returning 0 is essentially an escape character, saying the next value returned is special..
+                    //.. ie different than basic ascii values, note: key is only pressed once, the second call clears the buffer
+                switch(_getch()){ // second call here to get actual arrow value
+                    case 75:
+                        dir = LEFT;
+                        break;
+                    case 77:
+                        dir = RIGHT;
+                        break;
+                    case 72:
+                        dir = UP;
+                        break;
+                    case 80:
+                        dir = DOWN;
+                        break;
+                    default:
+                        break;
+                }
             default:
                 break;
         }
@@ -136,8 +154,8 @@ void logic () {
     if(dir != STOP){ 
         
         string message;
-        // prev_head = head;
-        grid[head.second][head.first] = {bd, dir};
+
+        grid[head.second][head.first] = {bd, dir}; //save body display and direction in current head coordinate
         
         switch (dir) { //snake head advances under current direction
             case LEFT:
@@ -178,7 +196,7 @@ void logic () {
             if(head.first < 0 || head.first == displayWidth  || head.second < 0 || head.second == displayHeight ){ 
                 gameOver = true;
 
-                head -= moveMnt[dir]; // used to mark location where snake head hit out of bounds
+                head -= moveMnt[dir]; // used to mark location where snake head hit out of bounds, just subtract direction
                 
                 message = "\nOut of bounds";
             }
@@ -198,10 +216,11 @@ void logic () {
         if(snakeExtend == false){  // advance tail pointer/coordinates if extend did not occur
             direction tailDirection = grid[tail.second][tail.first].second;
             
-            grid[tail.second][tail.first].first = ' ';
-            // grid[tail.second][tail.first].second = {STOP};
+            grid[tail.second][tail.first].first = ' '; //clear the grid to simulate the snake advancing
+            //no need to clear grid[][].second because if the snake head revisits this particular..
+            //..grid spot again then it reassigns grid[][].second with a new dir at the start of logic().
 
-            // tail = tail + moveMnt[tailDirection];
+            // tail = tail + moveMnt[tailDirection]; // can use this instead
             tail += moveMnt[tailDirection];
 
             if(mode != '1'){ // check for snake tail wrapping around while following head
@@ -218,28 +237,29 @@ void logic () {
         } // if extend did occur then tail pointer remains the same, no need to change at the moment
 
         //logic needed for collision on 2 segment snake
-        if(hasTail && (moveMnt[prevDir] + moveMnt[dir]) == pair<int,int>{0,0} ) {
+        //if prevDir + dir == 0,0 then player has reversed directions and collided with itself
+        if(hasTail && (moveMnt[prevDir] + moveMnt[dir]) == pair<int,int>{0,0} ) { 
             
-            grid[head.second - moveMnt[dir].second][head.first - moveMnt[dir].first].first = ' '; //clear segment 
+            //clear previous head segment where the tail was headed, for visual effect
+            grid[head.second - moveMnt[dir].second][head.first - moveMnt[dir].first].first = ' '; 
             
             gameOver = true;
             message = "\nCongratulations you played(bit) yourself..";
         }
 
+        //logic for collison on rest of snake
         if (grid[head.second][head.first].first == bd){ // check for snake eating self
 
-            // grid[head.second - moveMnt[dir].second][head.first - moveMnt[dir].first].first = ' ';
-            
             gameOver = true;
             message = "\nCongratulations you played(bit) yourself..";
         }
 
         if(gameOver){
             grid[head.second][head.first].first = 'X'; // reasign head display value for death
-            grid_prnt();
+            grid_prnt(); // print grid again to show 'X', the location where the death occured
             cout << message << endl;
         } else {
-            grid[head.second][head.first].first = hd; // reasign head display value
+            grid[head.second][head.first].first = hd; //else reasign head display value where current head is, distinguishes it from body
         }
     }
 }
